@@ -930,7 +930,26 @@ Add, update, remove pre-filter
   ```html
   <app>
     <file-upload ref="upload" :drop="true"></file-upload>
-    <span v-show="$refs.upload && $refs.upload.dropActive">拖拽到这里上传</span>
+    <span v-show="$refs.upload && $refs.upload.dropActive">拖拽到此处上传</span>
+  </app>
+  ```
+
+
+### dropElementActive
+
+是否拖拽到容器组件内
+
+* **类型:** `Boolean`
+
+* **只读:** `true`
+
+* **默认值:** `false`
+
+* **示例:**
+  ```html
+  <app>
+    <file-upload ref="upload" :drop="true"></file-upload>
+    <span v-show="$refs.upload && $refs.upload.dropActive && $refs.upload.dropElementActive">已拖到此处 释放鼠标即可添加文件</span>
   </app>
   ```
 

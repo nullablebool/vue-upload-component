@@ -1144,6 +1144,25 @@ Is dragging
   ```
 
 
+### dropElementActive
+
+Is Dragged to container
+
+* **Type:** `Boolean`
+
+* **Read only:** `true`
+
+* **Default:** `false`
+
+* **Usage:**
+  ```html
+  <app>
+    <file-upload ref="upload" :drop="true"></file-upload>
+    <span v-show="$refs.upload && $refs.upload.dropActive && $refs.upload.dropElementActive">Already dragged here, release the mouse to add the file</span>
+  </app>
+  ```
+
+
 
 
 

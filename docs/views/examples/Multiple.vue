@@ -6,9 +6,9 @@
         :class="{ 'drop-element-active': $refs.upload1 && $refs.upload1.dropElementActive }">
         <h3>
           {{ $refs.upload1 && $refs.upload1.dropElementActive ?
-          "Drop files to upload1 (element)"
+          "Release the mouse to add to upload1 (element)"
           :
-          "Drop files to upload1" }}
+          "Drag and drop here to upload1" }}
         </h3>
       </div>
 
@@ -22,7 +22,7 @@
           <span v-else></span>
         </li>
       </ul>
-      <h5 class="drop-title">Drag and drop files into the container to upload</h5>
+      <h5 class="drop-title">Drag and drop files into the container to upload1</h5>
       <div class="example-btn">
         <file-upload class="btn btn-primary" input-id="file1" post-action="/upload/post" v-model="files1" ref="upload1"
           drop=".upload-drop-container-1" :drop-directory="true" :multiple="true">
@@ -57,9 +57,9 @@
         <h3>
           {{ $refs.upload2 && $refs.upload2.dropElementActive
           ?
-          "Drop files to upload2 (element)"
+          "Release the mouse to add to upload2 (element)"
           :
-          "Drop files to upload2" }}
+          "Drag and drop here to upload2" }}
         </h3>
       </div>
       <ul>
@@ -72,7 +72,7 @@
           <span v-else></span>
         </li>
       </ul>
-      <h5 class="drop-title">Drag and drop files into the container to upload</h5>
+      <h5 class="drop-title">Drag and drop files into the container to upload2</h5>
       <div class="example-btn">
         <file-upload class="btn btn-primary" input-id="file2" post-action="/upload/post" v-model="files2" ref="upload2"
           drop=".upload-drop-container-2" :drop-directory="true" :multiple="true">

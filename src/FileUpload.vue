@@ -49,6 +49,7 @@ import { PropType, defineComponent, h } from "vue";
 
 // @ts-ignore
 import ChunkUploadDefaultHandler from './chunk/ChunkUploadHandler.js'
+
 const CHUNK_DEFAULT_OPTIONS = {
   headers: {},
   action: '',
@@ -70,6 +71,10 @@ export interface ChunkOptions {
 export interface Data {
   active: boolean;
   dropActive: boolean;
+
+  // 用于拖拽 激活判断容器 默认 document
+  // https://github.com/lian-yue/vue-upload-component/pull/451
+  dropElementActive: boolean;
   files: VueUploadItem[];
   maps: { [key: string]: VueUploadItem };
   destroy: boolean;
@@ -149,9 +154,6 @@ export interface VueUploadItem {
 
   [key: string]: any;
 }
-
-
-
 
 
 
@@ -279,6 +281,7 @@ export default defineComponent({
       },
       active: false,
       dropActive: false,
+      dropElementActive: false,
       uploading: 0,
       destroy: false,
       maps: {},
@@ -302,8 +305,8 @@ export default defineComponent({
       if (typeof input.webkitdirectory === 'boolean' || typeof input.directory === 'boolean') {
         this.features.directory = true
       }
-      // 拖拽特征
-      if (this.features.html5 && typeof input.ondrop !== 'undefined') {
+      // 拖拽特征. 要兼容 relatedTarget
+      if (this.features.html5 && typeof input.ondrop !== 'undefined' && this.isRelatedTargetSupported()) {
         this.features.drop = true
       }
     } else {
@@ -344,6 +347,7 @@ export default defineComponent({
     this.active = false
     // 销毁拖拽事件
     this.watchDrop(false)
+
     // 销毁不激活
     this.watchActive(false)
   },
@@ -1511,6 +1515,9 @@ export default defineComponent({
           document.removeEventListener('dragleave', this.onDocumentDragleave, false)
           document.removeEventListener('dragover', this.onDocumentDragover, false)
           document.removeEventListener('drop', this.onDocumentDrop, false)
+
+          this.dropElement.removeEventListener('dragenter', this.onDragenter, false)
+          this.dropElement.removeEventListener('dragleave', this.onDragleave, false)
           this.dropElement.removeEventListener('dragover', this.onDragover, false)
           this.dropElement.removeEventListener('drop', this.onDrop, false)
         } catch (e) {
@@ -1544,6 +1551,9 @@ export default defineComponent({
         document.addEventListener('dragleave', this.onDocumentDragleave, false)
         document.addEventListener('dragover', this.onDocumentDragover, false)
         document.addEventListener('drop', this.onDocumentDrop, false)
+
+        this.dropElement.addEventListener('dragenter', this.onDragenter, false)
+        this.dropElement.addEventListener('dragleave', this.onDragleave, false)
         this.dropElement.addEventListener('dragover', this.onDragover, false)
         this.dropElement.addEventListener('drop', this.onDrop, false)
       }
@@ -1552,6 +1562,11 @@ export default defineComponent({
     watchDropActive(newDropActive: boolean, oldDropActive?: boolean) {
       if (newDropActive === oldDropActive) {
         return
+      }
+
+      // 设置 dropElementActive false
+      if (!newDropActive && this.dropElementActive) {
+        this.dropElementActive = false
       }
 
       if (this.dropTimeout) {
@@ -1588,6 +1603,7 @@ export default defineComponent({
         this.watchDropActive(true)
       }
     },
+
     onDocumentDragleave(e: DragEvent) {
       if (!this.dropActive) {
         return
@@ -1599,20 +1615,62 @@ export default defineComponent({
         this.watchDropActive(false)
       }
     },
+
     onDocumentDragover() {
       this.watchDropActive(true)
     },
+
     onDocumentDrop() {
       this.dropActive = false
       this.watchDropActive(false)
     },
+
+    onDragenter(e: DragEvent) {
+      if (!this.dropActive || this.dropElementActive) {
+        return
+      }
+      this.dropElementActive = true
+    },
+
+    onDragleave(e: DragEvent) {
+      if (!this.dropElementActive) {
+        return
+      }
+      
+      const related = e.relatedTarget as ParentNode | null;
+
+
+      if (!related) {
+        this.dropElementActive = false
+      } else if (this.dropElement?.contains) {
+        if (!this.dropElement.contains(related)) {
+          this.dropElementActive = false
+        }
+      } else {
+        let child = related
+        while (child) {
+          if (child === this.dropElement) {
+            break
+          }
+          // @ts-ignore
+          child = child.parentNode;
+        }
+        if (child !== this.dropElement) {
+          this.dropElementActive = false
+        }
+      }
+    },
+
     onDragover(e: DragEvent) {
       e.preventDefault()
     },
+
     onDrop(e: DragEvent) {
       e.preventDefault()
       e.dataTransfer && this.addDataTransfer(e.dataTransfer)
     },
+
+
     async inputOnChange(e: Event) {
       if (!(e.target instanceof HTMLInputElement)) {
         return Promise.reject(new Error("not HTMLInputElement"))
@@ -1628,6 +1686,21 @@ export default defineComponent({
       }
 
       return this.addInputFile(e.target).then(reinput).catch(reinput)
+    },
+
+    isRelatedTargetSupported() {
+      try {
+        // 创建一个模拟的 MouseEvent
+        const event = new MouseEvent('mouseout', {
+          relatedTarget: document.body
+        });
+        console.log('relatedTarget' in event)
+        return 'relatedTarget' in event; // 检查 `relatedTarget` 属性是否存在
+      } catch (e) {
+        console.log(e)
+        // 如果 MouseEvent 不受支持，或者无法设置 relatedTarget
+        return false;
+      }
     },
   },
 })

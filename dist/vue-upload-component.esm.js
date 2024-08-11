@@ -734,6 +734,9 @@ var CHUNK_DEFAULT_OPTIONS = {
   handler: ChunkUploadHandler
 };
 var script = defineComponent({
+  compatConfig: {
+    MODE: 3
+  },
   props: {
     inputId: {
       type: String
@@ -845,6 +848,7 @@ var script = defineComponent({
       },
       active: false,
       dropActive: false,
+      dropElementActive: false,
       uploading: 0,
       destroy: false,
       maps: {},
@@ -870,10 +874,10 @@ var script = defineComponent({
       // @ts-ignore
       if (typeof input.webkitdirectory === 'boolean' || typeof input.directory === 'boolean') {
         this.features.directory = true;
-      } // 拖拽特征
+      } // 拖拽特征. 要兼容 relatedTarget
 
 
-      if (this.features.html5 && typeof input.ondrop !== 'undefined') {
+      if (this.features.html5 && typeof input.ondrop !== 'undefined' && this.isRelatedTargetSupported()) {
         this.features.drop = true;
       }
     } else {
@@ -2203,6 +2207,8 @@ var script = defineComponent({
           document.removeEventListener('dragleave', this.onDocumentDragleave, false);
           document.removeEventListener('dragover', this.onDocumentDragover, false);
           document.removeEventListener('drop', this.onDocumentDrop, false);
+          this.dropElement.removeEventListener('dragenter', this.onDragenter, false);
+          this.dropElement.removeEventListener('dragleave', this.onDragleave, false);
           this.dropElement.removeEventListener('dragover', this.onDragover, false);
           this.dropElement.removeEventListener('drop', this.onDrop, false);
         } catch (e) {}
@@ -2238,6 +2244,8 @@ var script = defineComponent({
         document.addEventListener('dragleave', this.onDocumentDragleave, false);
         document.addEventListener('dragover', this.onDocumentDragover, false);
         document.addEventListener('drop', this.onDocumentDrop, false);
+        this.dropElement.addEventListener('dragenter', this.onDragenter, false);
+        this.dropElement.addEventListener('dragleave', this.onDragleave, false);
         this.dropElement.addEventListener('dragover', this.onDragover, false);
         this.dropElement.addEventListener('drop', this.onDrop, false);
       }
@@ -2245,6 +2253,11 @@ var script = defineComponent({
     watchDropActive: function watchDropActive(newDropActive, oldDropActive) {
       if (newDropActive === oldDropActive) {
         return;
+      } // 设置 dropElementActive false
+
+
+      if (!newDropActive && this.dropElementActive) {
+        this.dropElementActive = false;
       }
 
       if (this.dropTimeout) {
@@ -2302,6 +2315,45 @@ var script = defineComponent({
       this.dropActive = false;
       this.watchDropActive(false);
     },
+    onDragenter: function onDragenter(e) {
+      if (!this.dropActive || this.dropElementActive) {
+        return;
+      }
+
+      this.dropElementActive = true;
+    },
+    onDragleave: function onDragleave(e) {
+      var _this$dropElement;
+
+      if (!this.dropElementActive) {
+        return;
+      }
+
+      var related = e.relatedTarget;
+
+      if (!related) {
+        this.dropElementActive = false;
+      } else if ((_this$dropElement = this.dropElement) !== null && _this$dropElement !== void 0 && _this$dropElement.contains) {
+        if (!this.dropElement.contains(related)) {
+          this.dropElementActive = false;
+        }
+      } else {
+        var child = related;
+
+        while (child) {
+          if (child === this.dropElement) {
+            break;
+          } // @ts-ignore
+
+
+          child = child.parentNode;
+        }
+
+        if (child !== this.dropElement) {
+          this.dropElementActive = false;
+        }
+      }
+    },
     onDragover: function onDragover(e) {
       e.preventDefault();
     },
@@ -2329,6 +2381,18 @@ var script = defineComponent({
       };
 
       return this.addInputFile(e.target).then(reinput).catch(reinput);
+    },
+    isRelatedTargetSupported: function isRelatedTargetSupported() {
+      try {
+        // 创建一个模拟的 MouseEvent
+        var event = new MouseEvent('mouseout', {
+          relatedTarget: document.body
+        });
+        return 'relatedTarget' in event; // 检查 `relatedTarget` 属性是否存在
+      } catch (e) {
+        // 如果 MouseEvent 不受支持，或者无法设置 relatedTarget
+        return false;
+      }
     }
   }
 });

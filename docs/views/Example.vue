@@ -28,6 +28,9 @@
           <li class="nav-item">
             <router-link active-class="active" class="nav-link" :to="$toLocale('/examples/typescript')">{{$t('example.typescript')}}</router-link>
           </li>
+          <li class="nav-item">
+            <router-link active-class="active" class="nav-link" :to="$toLocale('/examples/asyncevents')">{{$t('example.asyncevents')}}</router-link>
+          </li>
         </ul>
       </nav>
     </div>

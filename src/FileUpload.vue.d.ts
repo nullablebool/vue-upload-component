@@ -12,6 +12,7 @@ export interface ChunkOptions {
 export interface Data {
     active: boolean;
     dropActive: boolean;
+    dropElementActive: boolean;
     files: VueUploadItem[];
     maps: {
         [key: string]: VueUploadItem;
@@ -211,9 +212,12 @@ declare const _default: import("vue").DefineComponent<{
     onDocumentDragleave(e: DragEvent): void;
     onDocumentDragover(): void;
     onDocumentDrop(): void;
+    onDragenter(e: DragEvent): void;
+    onDragleave(e: DragEvent): void;
     onDragover(e: DragEvent): void;
     onDrop(e: DragEvent): void;
     inputOnChange(e: Event): Promise<any>;
+    isRelatedTargetSupported(): boolean;
 }, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, ("update:modelValue" | "input-filter" | "input-file")[], "update:modelValue" | "input-filter" | "input-file", import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps, Readonly<import("vue").ExtractPropTypes<{
     inputId: {
         type: StringConstructor;

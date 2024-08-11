@@ -28,5 +28,6 @@ export default {
     chunk: 'Chunk upload',
     vuex: 'Vuex',
     typescript: 'Typescript',
+    asyncevents: 'Async Events',
   }
 }

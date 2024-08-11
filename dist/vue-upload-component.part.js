@@ -1,7 +1,7 @@
 /*!
  Name: vue-upload-component 
 Component URI: https://github.com/lian-yue/vue-upload-component#readme 
-Version: 3.1.14 
+Version: 3.1.15 
 Author: LianYue 
 License: Apache-2.0 
 Description: Vue.js file upload component, Multi-file upload, Upload directory, Drag upload, Drag the directory, Upload multiple files at the same time, html4 (IE 9), `PUT` method, Customize the filter 
@@ -680,6 +680,9 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
     handler: ChunkUploadHandler
   };
   var script = vue.defineComponent({
+    compatConfig: {
+      MODE: 3
+    },
     props: {
       inputId: {
         type: String
@@ -791,6 +794,7 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
         },
         active: false,
         dropActive: false,
+        dropElementActive: false,
         uploading: 0,
         destroy: false,
         maps: {},
@@ -816,10 +820,10 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
         // @ts-ignore
         if (typeof input.webkitdirectory === 'boolean' || typeof input.directory === 'boolean') {
           this.features.directory = true;
-        } // 拖拽特征
+        } // 拖拽特征. 要兼容 relatedTarget
 
 
-        if (this.features.html5 && typeof input.ondrop !== 'undefined') {
+        if (this.features.html5 && typeof input.ondrop !== 'undefined' && this.isRelatedTargetSupported()) {
           this.features.drop = true;
         }
       } else {
@@ -2149,6 +2153,8 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
             document.removeEventListener('dragleave', this.onDocumentDragleave, false);
             document.removeEventListener('dragover', this.onDocumentDragover, false);
             document.removeEventListener('drop', this.onDocumentDrop, false);
+            this.dropElement.removeEventListener('dragenter', this.onDragenter, false);
+            this.dropElement.removeEventListener('dragleave', this.onDragleave, false);
             this.dropElement.removeEventListener('dragover', this.onDragover, false);
             this.dropElement.removeEventListener('drop', this.onDrop, false);
           } catch (e) {}
@@ -2184,6 +2190,8 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
           document.addEventListener('dragleave', this.onDocumentDragleave, false);
           document.addEventListener('dragover', this.onDocumentDragover, false);
           document.addEventListener('drop', this.onDocumentDrop, false);
+          this.dropElement.addEventListener('dragenter', this.onDragenter, false);
+          this.dropElement.addEventListener('dragleave', this.onDragleave, false);
           this.dropElement.addEventListener('dragover', this.onDragover, false);
           this.dropElement.addEventListener('drop', this.onDrop, false);
         }
@@ -2191,6 +2199,11 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
       watchDropActive: function watchDropActive(newDropActive, oldDropActive) {
         if (newDropActive === oldDropActive) {
           return;
+        } // 设置 dropElementActive false
+
+
+        if (!newDropActive && this.dropElementActive) {
+          this.dropElementActive = false;
         }
 
         if (this.dropTimeout) {
@@ -2248,6 +2261,45 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
         this.dropActive = false;
         this.watchDropActive(false);
       },
+      onDragenter: function onDragenter(e) {
+        if (!this.dropActive || this.dropElementActive) {
+          return;
+        }
+
+        this.dropElementActive = true;
+      },
+      onDragleave: function onDragleave(e) {
+        var _this$dropElement;
+
+        if (!this.dropElementActive) {
+          return;
+        }
+
+        var related = e.relatedTarget;
+
+        if (!related) {
+          this.dropElementActive = false;
+        } else if ((_this$dropElement = this.dropElement) !== null && _this$dropElement !== void 0 && _this$dropElement.contains) {
+          if (!this.dropElement.contains(related)) {
+            this.dropElementActive = false;
+          }
+        } else {
+          var child = related;
+
+          while (child) {
+            if (child === this.dropElement) {
+              break;
+            } // @ts-ignore
+
+
+            child = child.parentNode;
+          }
+
+          if (child !== this.dropElement) {
+            this.dropElementActive = false;
+          }
+        }
+      },
       onDragover: function onDragover(e) {
         e.preventDefault();
       },
@@ -2275,6 +2327,18 @@ Description: Vue.js file upload component, Multi-file upload, Upload directory, 
         };
 
         return this.addInputFile(e.target).then(reinput).catch(reinput);
+      },
+      isRelatedTargetSupported: function isRelatedTargetSupported() {
+        try {
+          // 创建一个模拟的 MouseEvent
+          var event = new MouseEvent('mouseout', {
+            relatedTarget: document.body
+          });
+          return 'relatedTarget' in event; // 检查 `relatedTarget` 属性是否存在
+        } catch (e) {
+          // 如果 MouseEvent 不受支持，或者无法设置 relatedTarget
+          return false;
+        }
       }
     }
   });

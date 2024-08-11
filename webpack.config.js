@@ -68,6 +68,7 @@ module.exports = {
     'marked': 'marked',
     'highlight.js': 'hljs',
     'cropperjs': 'Cropper',
+    'crypto-js': 'CryptoJS',
     '@xkeshi/image-compressor': 'ImageCompressor',
   },
 

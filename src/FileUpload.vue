@@ -93,6 +93,7 @@ export interface Features {
 
 
 
+
 export interface VueUploadItem {
   id: string;
 
@@ -113,10 +114,10 @@ export interface VueUploadItem {
 
   // 错误消息
   error?: Error | string,
-
+  
   // 是否成功
   success?: boolean,
-
+  
   // post 地址
   postAction?: string;
 
@@ -1636,7 +1637,7 @@ export default defineComponent({
       if (!this.dropElementActive) {
         return
       }
-      
+
       const related = e.relatedTarget as ParentNode | null;
 
 
@@ -1694,10 +1695,8 @@ export default defineComponent({
         const event = new MouseEvent('mouseout', {
           relatedTarget: document.body
         });
-        console.log('relatedTarget' in event)
         return 'relatedTarget' in event; // 检查 `relatedTarget` 属性是否存在
       } catch (e) {
-        console.log(e)
         // 如果 MouseEvent 不受支持，或者无法设置 relatedTarget
         return false;
       }

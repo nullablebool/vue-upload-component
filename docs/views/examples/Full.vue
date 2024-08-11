@@ -19,6 +19,7 @@
               <th>Name</th>
               <th>Width</th>
               <th>Height</th>
+              <th>Magic</th>
               <th>Size</th>
               <th>Speed</th>
               <th>Status</th>
@@ -27,7 +28,7 @@
           </thead>
           <tbody>
             <tr v-if="!files.length">
-              <td colspan="9">
+              <td colspan="10">
                 <div class="text-center p-5">
                   <h4>Drop files anywhere to upload<br />or</h4>
                   <label :for="name" class="btn btn-lg btn-primary">Select Files</label>
@@ -35,27 +36,28 @@
               </td>
             </tr>
             <tr v-for="(file, index) in files" :key="file.id">
-              <td>{{index}}</td>
+              <td>{{ index }}</td>
               <td>
                 <img class="td-image-thumb" v-if="file.thumb" :src="file.thumb" />
                 <span v-else>No Image</span>
               </td>
               <td>
                 <div class="filename">
-                  {{file.name}}
+                  {{ file.name }}
                 </div>
                 <div class="progress" v-if="file.active || file.progress !== '0.00'">
                   <div
-                    :class="{'progress-bar': true, 'progress-bar-striped': true, 'bg-danger': file.error, 'progress-bar-animated': file.active}"
-                    role="progressbar" :style="{width: file.progress + '%'}">{{file.progress}}%</div>
+                    :class="{ 'progress-bar': true, 'progress-bar-striped': true, 'bg-danger': file.error, 'progress-bar-animated': file.active }"
+                    role="progressbar" :style="{ width: file.progress + '%' }">{{ file.progress }}%</div>
                 </div>
               </td>
-              <td>{{file.width || 0}}</td>
-              <td>{{file.height || 0}}</td>
-              <td>{{$formatSize(file.size)}}</td>
-              <td>{{$formatSize(file.speed)}}</td>
+              <td>{{ file.width || 0 }}</td>
+              <td>{{ file.height || 0 }}</td>
+              <td>{{ "ext=" + (file.magic.ext || "") + ", mime=" + (file.magic.mime || "") }}</td>
+              <td>{{ $formatSize(file.size) }}</td>
+              <td>{{ $formatSize(file.speed) }}</td>
 
-              <td v-if="file.error">{{file.error}}</td>
+              <td v-if="file.error">{{ file.error }}</td>
               <td v-else-if="file.success">success</td>
               <td v-else-if="file.active">active</td>
               <td v-else></td>
@@ -65,21 +67,21 @@
                     Action
                   </button>
                   <div class="dropdown-menu">
-                    <a :class="{'dropdown-item': true, disabled: file.active || file.success || file.error === 'compressing' || file.error === 'image parsing'}"
+                    <a :class="{ 'dropdown-item': true, disabled: file.active || file.success || file.error === 'compressing' || file.error === 'image parsing' }"
                       href="#"
-                      @click.prevent="file.active || file.success || file.error === 'compressing' ? false :  onEditFileShow(file)">Edit</a>
-                    <a :class="{'dropdown-item': true, disabled: !file.active}" href="#"
-                      @click.prevent="file.active ? $refs.upload.update(file, {error: 'cancel'}) : false">Cancel</a>
+                      @click.prevent="file.active || file.success || file.error === 'compressing' ? false : onEditFileShow(file)">Edit</a>
+                    <a :class="{ 'dropdown-item': true, disabled: !file.active }" href="#"
+                      @click.prevent="file.active ? $refs.upload.update(file, { error: 'cancel' }) : false">Cancel</a>
 
                     <a class="dropdown-item" href="#" v-if="file.active"
-                      @click.prevent="$refs.upload.update(file, {active: false})">Abort</a>
+                      @click.prevent="$refs.upload.update(file, { active: false })">Abort</a>
                     <a class="dropdown-item" href="#"
                       v-else-if="file.error && file.error !== 'compressing' && file.error !== 'image parsing' && $refs.upload.features.html5"
-                      @click.prevent="$refs.upload.update(file, {active: true, error: '', progress: '0.00'})">Retry
+                      @click.prevent="$refs.upload.update(file, { active: true, error: '', progress: '0.00' })">Retry
                       upload</a>
-                    <a :class="{'dropdown-item': true, disabled: file.success || file.error === 'compressing' || file.error === 'image parsing'}"
+                    <a :class="{ 'dropdown-item': true, disabled: file.success || file.error === 'compressing' || file.error === 'image parsing' }"
                       href="#" v-else
-                      @click.prevent="file.success || file.error === 'compressing' || file.error === 'image parsing' ? false : $refs.upload.update(file, {active: true})">Upload</a>
+                      @click.prevent="file.success || file.error === 'compressing' || file.error === 'image parsing' ? false : $refs.upload.update(file, { active: true })">Upload</a>
 
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#" @click.prevent="$refs.upload.remove(file)">Remove</a>
@@ -92,10 +94,10 @@
       </div>
       <div class="example-foorer">
         <div class="footer-status float-right">
-          Drop: {{$refs.upload ? $refs.upload.drop : false}}, 
-          Active: {{$refs.upload ? $refs.upload.active : false}}, 
-          Uploaded: {{$refs.upload ? $refs.upload.uploaded : true}}, 
-          Drop active: {{$refs.upload ? $refs.upload.dropActive : false}}, 
+          Drop: {{ $refs.upload ? $refs.upload.drop : false }},
+          Active: {{ $refs.upload ? $refs.upload.active : false }},
+          Uploaded: {{ $refs.upload ? $refs.upload.uploaded : true }},
+          Drop active: {{ $refs.upload ? $refs.upload.dropActive : false }},
           Drop element active: {{ $refs.upload ? $refs.upload.dropElementActive : false }}
         </div>
         <div class="btn-group">
@@ -172,7 +174,7 @@
       <div class="form-group">
         <label for="autoCompress">Automatically compress:</label>
         <input type="number" min="0" id="autoCompress" class="form-control" v-model.number="autoCompress">
-        <small class="form-text text-muted" v-if="autoCompress > 0">More than {{$formatSize(autoCompress)}} files are
+        <small class="form-text text-muted" v-if="autoCompress > 0">More than {{ $formatSize(autoCompress) }} files are
           automatically compressed</small>
         <small class="form-text text-muted" v-else>Set up automatic compression</small>
       </div>
@@ -230,8 +232,8 @@
 
 
 
-    <div :class="{'modal-backdrop': true, 'fade': true, show: addData.show}"></div>
-    <div :class="{modal: true, fade: true, show: addData.show}" id="modal-add-data" tabindex="-1" role="dialog">
+    <div :class="{ 'modal-backdrop': true, 'fade': true, show: addData.show }"></div>
+    <div :class="{ modal: true, fade: true, show: addData.show }" id="modal-add-data" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -274,8 +276,8 @@
 
 
 
-    <div :class="{'modal-backdrop': true, 'fade': true, show: editFile.show}"></div>
-    <div :class="{modal: true, fade: true, show: editFile.show}" id="modal-edit-file" tabindex="-1" role="dialog">
+    <div :class="{ 'modal-backdrop': true, 'fade': true, show: editFile.show }"></div>
+    <div :class="{ modal: true, fade: true, show: editFile.show }" id="modal-edit-file" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -336,7 +338,8 @@
   visibility: hidden;
   transition: all .2s
 }
-.example-full .btn-group:hover > .dropdown-menu {
+
+.example-full .btn-group:hover>.dropdown-menu {
   visibility: visible;
 }
 
@@ -360,6 +363,7 @@
 .example-full .btn-is-option {
   margin-top: 0.25rem;
 }
+
 .example-full .example-foorer {
   padding: .5rem 0;
   border-top: 1px solid #e9ecef;
@@ -375,7 +379,7 @@
   margin-top: .6rem;
 }
 
-.example-full .edit-image-tool .btn-group{
+.example-full .edit-image-tool .btn-group {
   margin-right: .6rem;
 }
 
@@ -413,6 +417,8 @@
 <script>
 import Cropper from 'cropperjs'
 import ImageCompressor from '@xkeshi/image-compressor'
+import { fileTypeFromBuffer } from "file-type";
+
 import FileUpload from 'vue-upload-component'
 export default {
   components: {
@@ -472,7 +478,7 @@ export default {
       }
 
       if (newValue) {
-        this.$nextTick( () => {
+        this.$nextTick(() => {
           if (!this.$refs.editImage) {
             return
           }
@@ -512,6 +518,26 @@ export default {
         // 过滤 php html js 文件
         if (/\.(php5?|html?|jsx?)$/i.test(newFile.name) && newFile.type !== "text/directory") {
           return prevent()
+        }
+
+        // async magic
+        if (!newFile.magic && newFile.file && newFile.fileObject) {
+          prevent();
+
+            // async magic
+             (async () => {
+              try {
+                const chunk = newFile.file.slice(0, 128); // 读取前 128 个字节
+                const arrayBuffer = await chunk.arrayBuffer();
+                newFile.magic = await fileTypeFromBuffer(new Uint8Array(arrayBuffer));
+                newFile.magic = newFile.magic || {}
+                this.$refs.upload.add(newFile);
+              } catch (e) {
+                newFile.error = e.code || e.error || e.message || e
+                this.$refs.upload.add(newFile);
+              }
+            })()
+          return
         }
 
         // Automatic compression
@@ -557,10 +583,10 @@ export default {
         newFile.error = 'image parsing'
         let img = new Image();
         img.onload = () => {
-          this.$refs.upload.update(newFile, {error: '', height: img.height, width: img.width})
-        } 
+          this.$refs.upload.update(newFile, { error: '', height: img.height, width: img.width })
+        }
         img.οnerrοr = (e) => {
-          this.$refs.upload.update(newFile, { error: 'parsing image size'}) 
+          this.$refs.upload.update(newFile, { error: 'parsing image size' })
         }
         img.src = newFile.blob
       }
@@ -665,7 +691,7 @@ export default {
       document.querySelector("body").appendChild(input)
       input.click()
       input.onchange = (e) => {
-        this.$refs.upload.addInputFile(input).then(function() {
+        this.$refs.upload.addInputFile(input).then(function () {
           document.querySelector("body").removeChild(input)
         })
       }

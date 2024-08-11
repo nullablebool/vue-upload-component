@@ -63,8 +63,8 @@ export default {
     
     const files = ref([])
 
-    function inputFilter(newFile, oldFile, prevent) {
-      if (newFile && !oldFile) {
+    async function inputFilter(newFile, oldFile, prevent) {
+       if (newFile && !oldFile) {
         // Before adding a file
         // 添加文件前
 

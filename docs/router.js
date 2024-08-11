@@ -13,13 +13,13 @@ import MultipleExampleComponent from './views/examples/Multiple'
 import ChunkExampleComponent from './views/examples/Chunk'
 import VuexExampleComponent from './views/examples/Vuex'
 import TypescriptExampleComponent from './views/examples/Typescript'
+import AsyncEventsExampleComponent from './views/examples/AsyncEvents'
 
 
 // console.log(i18n)
 
 
-let examples = [
-  {
+let examples = [{
     path: '',
     component: FullExampleComponent,
   },
@@ -59,6 +59,10 @@ let examples = [
     path: 'typescript',
     component: TypescriptExampleComponent,
   },
+  {
+    path: 'asyncevents',
+    component: AsyncEventsExampleComponent,
+  },
 ]
 
 
@@ -73,27 +77,24 @@ const router = createRouter({
       return { x: 0, y: 0 }
     }
   },
-  routes: [
-    {
-      path: '/:locale(' + i18n.global.availableLocales.join('|') + ')?',
-      component: RouterComponent,
-      children: [
-        {
-          path: 'documents',
-          component: DocumentComponent,
-        },
-        {
-          path: 'examples',
-          component: ExampleComponent,
-          children: examples,
-        },
-        {
-          path: '',
-          component: ExampleComponent,
-          children: examples,
-        },
-      ]
-    },
-  ]
+  routes: [{
+    path: '/:locale(' + i18n.global.availableLocales.join('|') + ')?',
+    component: RouterComponent,
+    children: [{
+        path: 'documents',
+        component: DocumentComponent,
+      },
+      {
+        path: 'examples',
+        component: ExampleComponent,
+        children: examples,
+      },
+      {
+        path: '',
+        component: ExampleComponent,
+        children: examples,
+      },
+    ]
+  }, ]
 })
 export default router
